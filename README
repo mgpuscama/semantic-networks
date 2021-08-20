@@ -21,3 +21,13 @@ NOTE ABOUT STIMULI:
 For Round 1, 2 words were assigned the same ID (championship/campeonato and partido/game were both 2_2_2). This messes up the wrangling and compilation of data. When downloading the data from Qualtrics, I manually changed campeonato/championship to 2_2_4, which is the correct word_ID.
 
 For Round 3, participants saw the word "water" twice, and I cannot retrieve which iteration they saw first (the order of the stimuli was randomized). Thus, the script randomly samples one of the iterations of "water" per participant. This should not affect the results significantly, since upon examination 58% of the participants responded with the same or almost the same 3 associates on both iterations (2/3 or 3/3); 24% of the participants repeated one associate on both iterations, and only 16% had distinctive responses on both repetitions of "water".
+
+L2 LEARNERS
+
+The L2 learner data collection is ongoing. 
+
+PRELIMINARY COMPARISONS
+
+Point Mutual Information scores were computed using the Lightweight Metrics of Semantic Similarity model (LMOSS), by Recchia & Jones (2009). This model computes similarity scores between pairs of words, based on their co-occurrence in a corpus. The corpus used for the Spanish word pairs (prompt-response) was Corpus del Español (see my corpus-prep GitHub repository to learn more).
+
+Additionally, I look at degrees (i.e., variety of responses to a given prompt).

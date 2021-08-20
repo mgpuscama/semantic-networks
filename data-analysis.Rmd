@@ -1,0 +1,373 @@
+---
+title: "data-analysis"
+author: "M. Gabriela Puscama"
+date: "8/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(fig.show='show')
+```
+
+```{r Load Packages}
+
+library(tidyverse) #To import, format and wrangle data, make plots (ggplot2), and edit strings (stringr)
+library(plyr) #To calculate links weights for network analysis. CAREFUL! Some functions like rename() and summarize() do not work properly on tidyverse when plyr is also loaded.
+
+```
+
+----------------LANGUAGE HISTORY AND DEMOGRAPHICS------------------------------
+NATIVE SPEAKERS
+
+```{r Load Data - LHQ}
+
+data1A <- read_csv("./data/Diss_Exp1_Round1_L1Span_ListA_raw.csv")
+data1B <- read_csv("./data/Diss_Exp1_Round1_L1Span_ListB_raw.csv")
+data2A <- read_csv("./data/Diss_Exp1_Round2_L1Span_ListA_raw.csv")
+data2B <- read_csv("./data/Diss_Exp1_Round2_L1Span_ListB_raw.csv")
+data3 <- read.csv("./data/Diss_Exp1_Round3_L1Span_UniqueList_raw.csv")
+
+```
+
+```{r Column Formatting - LHQ}
+
+# Add "Iteration_Survey" column to rounds 2 and 3, to standardize, using dummy ifelse statements:
+data2A$Iteration_Survey <- ifelse(data2A$Gender=="Femenine", "first", "first")
+data2B$Iteration_Survey <- ifelse(data2B$Gender=="Femenine", "first", "first")
+data3$Iteration_Survey <- ifelse(data3$Gender=="Femenine", "first", "first")
+
+# Select columns of interest and standardize names.
+data1A_clean <- data1A %>%
+  select(Iteration_Survey,
+         Participant,
+         Gender,
+         Age,
+         SpanL1,
+         LangSpoken,
+         'Lang_0-5',
+         'Lang_6-12',
+         'Lang_13-18',
+         Eng_classes,
+         Eng_classes_time,
+         Eng_classes_amount,
+         Caregivers_speak_Eng,
+         Eng_travel,
+         Eng_country)%>%
+  rename(iteration=Iteration_Survey,
+         participant=Participant,
+         gender=Gender,
+         age=Age,
+         languages=LangSpoken,
+         lang0to5='Lang_0-5',
+         lang6to12='Lang_6-12',
+         lang13to18='Lang_13-18',
+         caregiversEng=Caregivers_speak_Eng)
+
+data1B_clean <- data1B %>%
+  select(Iteration_Survey,
+         Participant,
+         Gender,
+         Age,
+         SpanL1,
+         LangSpoken,
+         'Lang_0-5',
+         'Lang_6-12',
+         'Lang_13-18',
+         Eng_classes,
+         Eng_classes_time,
+         Eng_classes_amount,
+         Caregivers_speak_Eng,
+         Eng_travel,
+         Eng_country)%>%
+  rename(iteration=Iteration_Survey,
+         participant=Participant,
+         gender=Gender,
+         age=Age,
+         languages=LangSpoken,
+         lang0to5='Lang_0-5',
+         lang6to12='Lang_6-12',
+         lang13to18='Lang_13-18',
+         caregiversEng=Caregivers_speak_Eng)
+
+data2A_clean <- data2A %>%
+  select(Iteration_Survey,
+         Participant,
+         Gender,
+         Age,
+         SpanL1,
+         LangSpoken,
+         'Lang_0-5',
+         'Lang_6-12',
+         'Lang_13-18',
+         Eng_classes,
+         Eng_classes_time,
+         Eng_classes_amount,
+         Caregivers_speak_Eng,
+         Eng_travel,
+         Eng_country)%>%
+  rename(iteration=Iteration_Survey,
+         participant=Participant,
+         gender=Gender,
+         age=Age,
+         languages=LangSpoken,
+         lang0to5='Lang_0-5',
+         lang6to12='Lang_6-12',
+         lang13to18='Lang_13-18',
+         caregiversEng=Caregivers_speak_Eng)
+
+data2B_clean <- data2B %>%
+  select(Iteration_Survey,
+         Participant,
+         Gender,
+         Age,
+         SpanL1,
+         LangSpoken,
+         'Lang_0-5',
+         'Lang_6-12',
+         'Lang_13-18',
+         Eng_classes,
+         Eng_classes_time,
+         Eng_classes_amount,
+         Caregivers_speak_Eng,
+         Eng_travel,
+         Eng_country)%>%
+  rename(iteration=Iteration_Survey,
+         participant=Participant,
+         gender=Gender,
+         age=Age,
+         languages=LangSpoken,
+         lang0to5='Lang_0-5',
+         lang6to12='Lang_6-12',
+         lang13to18='Lang_13-18',
+         caregiversEng=Caregivers_speak_Eng)
+
+data3_clean <- data3 %>%
+  select(Iteration_Survey,
+         Participant,
+         Gender,
+         Age,
+         SpanL1,
+         LangSpoken,
+         'Lang_0.5',
+         'Lang_6.12',
+         'Lang_13.18',
+         Eng_classes,
+         Eng_classes_time,
+         Eng_classes_amount,
+         Caregivers_speak_Eng,
+         Eng_travel,
+         Eng_country)%>%
+  rename(iteration=Iteration_Survey,
+         participant=Participant,
+         gender=Gender,
+         age=Age,
+         languages=LangSpoken,
+         lang0to5='Lang_0.5',
+         lang6to12='Lang_6.12',
+         lang13to18='Lang_13.18',
+         caregiversEng=Caregivers_speak_Eng)
+
+# Add List and Round columns using dummy ifelse statements.
+
+data1A_clean$list <- ifelse(data1A_clean$gender=="Femenine", "A", "A")
+data1B_clean$list <- ifelse(data1B_clean$gender=="Femenine", "B", "B")
+data2A_clean$list <- ifelse(data2A_clean$gender=="Femenine", "A", "A")
+data2B_clean$list <- ifelse(data2B_clean$gender=="Femenine", "B", "B")
+data3_clean$list <- ifelse(data3_clean$gender=="Femenine", "Unique", "Unique")
+
+data1A_clean$round <- ifelse(data1A_clean$gender=="Femenine", 1, 1)
+data1B_clean$round <- ifelse(data1B_clean$gender=="Femenine", 1, 1)
+data2A_clean$round <- ifelse(data2A_clean$gender=="Femenine", 2, 2)
+data2B_clean$round <- ifelse(data2B_clean$gender=="Femenine", 2, 2)
+data3_clean$round <- ifelse(data3_clean$gender=="Femenine", 3, 3)
+
+```
+
+```{r Merge Data sets - LHQ}
+
+lhq <- rbind(data1A_clean, data1B_clean, data2A_clean, data2B_clean, data3_clean)
+
+```
+
+```{r Exclusions and Save - LHQ}
+
+nrow(lhq)
+#[1] 249 #One participant from round 2 did not complete the survey, that's why the initial number here is 249 instead of 250.
+
+# Exclude participants' second iteration if they completed the survey twice, exclude those who reportedly were not raised speaking Spanish.  
+
+repeated_survey <- length(which(lhq$iteration=="second"))
+repeated_survey
+#[1] 5
+
+non_native <- length(which(lhq$SpanL1=="No"))
+non_native
+#[1] 3
+
+lhq_clean <- lhq %>%
+  filter(iteration == "first" & SpanL1 == "Yes")
+
+# 1 participant did not complete the survey, 5 completed it twice (first iteration only kept), and 3 reported not to have been raised in Spanish.
+
+nrow(lhq_clean)
+#[1] 241 Final number of participants
+
+write.csv(lhq_clean, "./data/SuppData/lhq_L1Span_clean.csv")
+
+```
+
+```{r Demographic and Language Tables - LHQ}
+
+age <- summary(lhq_clean$age)
+age
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#  18.00   20.00   24.00   24.29   27.00   35.00
+
+sd(lhq_clean$age)
+#[1] 4.493164
+
+gender <- table(lhq_clean$gender)
+gender
+#  Female       Male Non-binary 
+#  138        101          2
+
+Eng_classes <- table(lhq_clean$Eng_classes)
+100*prop.table(Eng_classes)      
+#No      Yes 
+#34.43983 65.56017
+
+Eng_caregivers <- table(lhq_clean$caregiversEng)
+100*prop.table(Eng_caregivers)     
+#      No      Yes 
+#39.83402 60.16598 
+
+```
+
+-----PRELIMINARY COMPARISONS BETWEEN L2 LEARNERS AND NATIVE SPEAKERS------------
+
+Mutual Information Scores - Round 1
+
+```{r Load Data - PMI}
+
+pmi_Span <- read_csv("./data/pmi_Round1_L1Span.csv")
+pmi_Eng <- read_csv("./data/pmi_Round1_L1Eng_prelim.csv")
+
+```
+
+```{r Format and Merge Datasets - PMI}
+
+# Add L1 column, using dummy ifelse statements
+pmi_Span$L1 <- ifelse(pmi_Span$PMI==0, "Span", "Span")
+pmi_Eng$L1 <- ifelse(pmi_Eng$PMI==0, "Eng", "Eng")
+
+# Merge datasets
+pmi_full <- rbind(pmi_Span, pmi_Eng)
+
+# Add logPMI column (bc of Zipfian distribution)
+pmi_full$logPMI <- log(pmi_full$SimplifiedPMI)
+
+```
+
+```{r Visualization - PMI}
+
+pmi_plot <- pmi_full %>%
+  ggplot(aes(x=logPMI, fill=L1)) + geom_density(alpha=0.2) + scale_fill_manual(values=c("#000000", "#0072B2"))
+pmi_plot
+
+ggsave("./figures/pmi_plot.png", plot = last_plot())
+
+```
+
+Node Degrees - Round 1
+
+The current dataset includes 64 L2 learners (32 per list) and 94 native speakers. To have the same number of participants on both groups, I randomly sample from the native speakers 32 participants per list, to make the comparison fair.
+
+```{r Load Data - Degrees}
+
+# Native speakers associations data
+assoc_Span <- read_csv("./data/associations_Round1_L1Span.csv")
+
+# L2 learners links data
+links_Eng <- read_csv("./data/links_L1Eng1_Span.csv")
+
+```
+
+```{r Random Sample Native Speakers - Degrees}
+
+# Clean associations data and filter Span block
+assoc_Span_clean <- assoc_Span %>%
+  filter (Comment != "Eng" | is.na(Comment)) %>%
+  filter (Response != "NA") %>%
+  filter(Block=="Span")
+  
+# Create separate datasets for each list
+assoc_SpanA <- assoc_Span_clean %>%
+  filter(List=="A")
+assoc_SpanB <- assoc_Span_clean %>%
+  filter(List=="B")
+
+# Create vectors with participant IDs, to sample from
+Span_participantsA <- unique(assoc_SpanA$Participant)
+Span_participantsB <- unique(assoc_SpanB$Participant)
+
+# Sample 32 native speakers per list
+set.seed(20)
+Span_participantsA_sample <- sample(Span_participantsA, 32, replace=FALSE)
+Span_participantsB_sample <- sample(Span_participantsB, 32, replace=FALSE)
+
+# Filter data by the sampled participants
+assoc_Span_sampleA <- assoc_Span %>%
+  filter(Participant %in% Span_participantsA_sample)
+assoc_Span_sampleB <- assoc_Span %>%
+  filter(Participant %in% Span_participantsB_sample)
+
+# Merge sampled datasets
+assoc_Span_sample <- rbind(assoc_Span_sampleA, assoc_Span_sampleB)
+
+```
+
+```{r Compute Link Weights - Degrees}
+
+assoc_Span_sample <- assoc_Span_sample %>%
+  rename(source=word_lemma,
+         target=Response_lemma)
+
+links_Span_sample <- ddply(assoc_Span_sample, .(source, target), summarize, weight=length(source))
+
+```
+
+```{r Compute Degrees and Merge Groups - Degrees}
+
+# Compute degrees by group
+degrees_Span_sample <- links_Span_sample %>%
+  group_by(source) %>%
+  summarize(degree_Span=length(unique(target)))
+
+degrees_Eng <- links_Eng %>%
+  select(source, target) %>%
+  group_by(source) %>%
+  summarize(degree_Eng=length(unique(target)))
+
+# Merge datasets
+degrees <- left_join(degrees_Span_sample, degrees_Eng)
+
+# Filter NA rows
+degrees <- degrees %>%
+  filter(source != "NA")
+
+```
+
+```{r Visualization - Degrees}
+
+degrees_plot <- degrees %>% 
+  ggplot(aes(x=degree_Span, y=degree_Eng)) + 
+  geom_point() + 
+  geom_smooth(color="#44AA99") + 
+  geom_abline(slope=1, intercept=0, color="#AA4499", size=1) +
+  labs(title = "Node degrees by group", x = "Native Spanish speakers node degrees \n (number of different associates provided \n by the group for each prompt)", y = "L2 Spanish learners node degrees \n (number of different associates provided \n by the group for each prompt)")
+degrees_plot
+
+ggsave("./figures/degrees_plot.png", plot = last_plot())
+
+```

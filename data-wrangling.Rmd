@@ -1,5 +1,5 @@
 ---
-title: "Exp 1 Data Wrangling"
+title: "data-wrangling"
 author: "M.GabrielaPuscama"
 date: "April 26, 2021"
 output: html_document
