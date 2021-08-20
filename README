@@ -1,0 +1,23 @@
+Data from Dissertation Experiment 1: Word Associations
+
+Author: M. Gabriela Puscama
+Spring 2020 - Spring 2022
+
+NATIVE SPEAKERS
+
+In this experiment, participants read prompts (Spanish and English words), and are asked to provide three associated words for each. The most frequent responses to each prompt are then used for a second round of associations with the same procedure, and the same is repeated for a third round.
+
+Rounds 1 and 2 each have two lists (A and B), because some or all stimuli were translation equivalents between English and Spanish (e.g., airplane-avión), and I wanted to avoid priming effects if participants saw the same stimulus in both languages. Each of these two rounds were completd by 100 participants (50 per list). Round 3 only has 1 list, because there was no overlap across the English and Spanish stimuli, so this unique list was completed by 50 participants. This gives a total N=250, of native Spanish speakers who completed this task.
+
+This script cleans and formats the word association for each of the three rounds data, to apply network models. The cleaning and formatting process is done in two steps:
+
+- First participants are excluded based on responses to linguistic and demographic questionnaire; the data is formatted and saved. Each observation of this data is manually coded for several variables (e.g., response word class, response lemma, etc.).
+- Second, the coded data is cleaned again to remove missing responses or responses/participants who did not follow instructions (e.g., responded in English during the Spanish block).
+
+To compute weight of links, we are using the lemma columns, because we need the links to train a model (LMOSS) to calculate point mutual information (PMI), which is a semantic relatedness measure based on co-occurrence. In this coding, letters with diacritics have been replaced with double letter (e.g., avión --> avioon), and the same was done for the corpus (see Corpus del Español project).
+
+NOTE ABOUT STIMULI:
+
+For Round 1, 2 words were assigned the same ID (championship/campeonato and partido/game were both 2_2_2). This messes up the wrangling and compilation of data. When downloading the data from Qualtrics, I manually changed campeonato/championship to 2_2_4, which is the correct word_ID.
+
+For Round 3, participants saw the word "water" twice, and I cannot retrieve which iteration they saw first (the order of the stimuli was randomized). Thus, the script randomly samples one of the iterations of "water" per participant. This should not affect the results significantly, since upon examination 58% of the participants responded with the same or almost the same 3 associates on both iterations (2/3 or 3/3); 24% of the participants repeated one associate on both iterations, and only 16% had distinctive responses on both repetitions of "water".

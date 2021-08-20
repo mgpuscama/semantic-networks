@@ -1,0 +1,527 @@
+---
+title: "Exp 1 Data Wrangling"
+author: "M.GabrielaPuscama"
+date: "April 26, 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(results = 'hide')
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(fig.show='hide')
+
+```
+
+```{r Load Packages}
+
+library(tidyverse) #To import, format and wrangle data, make plots (ggplot2), and edit strings (stringr)
+library(plyr) #To calculate links weights for network analysis. CAREFUL! Some functions like rename() and summarize() do not work properly on tidyverse when plyr is also loaded.
+
+```
+
+-------------------NATIVE SPEAKERS-------------------
+
+ROUND 1: 2 lists (A and B), with 50 participants each
+
+```{r Load Data - Round 1}
+
+# Main Data
+data1A <- read_csv("./data/Diss_Exp1_Round1_L1Span_ListA_raw.csv")
+data1B <- read_csv("./data/Diss_Exp1_Round1_L1Span_ListB_raw.csv")
+
+# Stimuli Info
+ListA_SpanStim <- read_csv("./data/SuppData/ListA_SpanStim.csv")
+ListB_SpanStim <- read_csv("./data/SuppData/ListB_SpanStim.csv")
+ListA_EngStim <- read_csv("./data/SuppData/ListA_EngStim.csv")
+ListB_EngStim <- read_csv("./data/SuppData/ListB_EngStim.csv")
+
+```
+
+```{r Main Data Wrangling - Round 1}
+
+# For both lists, exclude participants who reportedly were not born and raised speaking Spanish and participants who did the survey twice.
+data1A <- data1A %>%
+  filter(SpanL1 == "Yes") %>%
+  filter (Iteration_Survey == "first")
+data1B <- data1B %>%
+  filter(SpanL1 == "Yes") %>%
+  filter (Iteration_Survey == "first")
+# 4 participants excluded from list A and 2 from list B (6 total)
+
+# Convert from wide to long format.
+data1A <- data1A %>%
+  gather(Word, Associate, 6:170)%>%
+  mutate(Word = str_replace(Word, "X.Field.2..", ""))%>%
+  separate(Word, c("word_ID", "AssociateNumber"), "\\.")%>% #TO USE DOT AS SEPARATOR MUST INCLUDE "\\" FIRST
+  mutate(AssociateNumber = str_replace(AssociateNumber, "relatedword", ""))%>%
+  filter(word_ID != "Forthisquestiontypethewordbananainthethreeboxes") #Eliminate attention check trials
+
+data1B <- data1B %>%
+  gather(Word, Associate, 6:170)%>%
+  mutate(Word = str_replace(Word, "X.Field.2..", ""))%>%
+  separate(Word, c("word_ID", "AssociateNumber"), "\\.")%>% #TO USE DOT AS SEPARATOR MUST INCLUDE "\\" FIRST
+  mutate(AssociateNumber = str_replace(AssociateNumber, "relatedword", ""))%>%
+  filter(word_ID != "Forthisquestiontypethewordbananainthethreeboxes") #Eliminate attention check trials
+
+# Before merging the two datasets, add List column using a dummy ifelse statement.  
+data1A$List <- ifelse(data1A$Gender == "Female", "A", "A")
+data1B$List <- ifelse(data1B$Gender == "Female", "B", "B")
+
+# Merge both lists
+assoc_L1Span1 <- rbind(data1A, data1B)
+
+```
+
+```{r Stimuli Info Wrangling - Round 1}
+
+# Rename columns
+## List A Span Block
+ListA_SpanStim <- ListA_SpanStim %>%
+  rename(word=Span_word)%>%
+  rename(translation=Eng_translation)
+## List A Eng Block
+ListA_EngStim <- ListA_EngStim %>%
+  rename(word=Eng_word)%>%
+  rename(translation=Span_translation)
+## List B Span Block
+ListB_SpanStim <- ListB_SpanStim %>%
+  rename(word=Span_word)%>%
+  rename(translation=Eng_translation)
+## List B Eng Block
+ListB_EngStim <- ListB_EngStim %>%
+  rename(word=Eng_word)%>%
+  rename(translation=Span_translation)
+
+# Add Block and List columns using dummy ifelse statements.
+ListA_SpanStim$Block <- ifelse(ListA_SpanStim$word=="cama", "Span", "Span")
+ListA_SpanStim$List <- ifelse(ListA_SpanStim$word=="cama", "A", "A")
+ListA_EngStim$Block <- ifelse(ListA_EngStim$word=="painting", "Eng", "Eng")
+ListA_EngStim$List <- ifelse(ListA_EngStim$word=="painting", "A", "A")
+ListB_SpanStim$Block <- ifelse(ListB_SpanStim$word=="cuadro", "Span", "Span")
+ListB_SpanStim$List <- ifelse(ListB_SpanStim$word=="cuadro", "B", "B")
+ListB_EngStim$Block <- ifelse(ListB_EngStim$word=="bed", "Eng", "Eng")
+ListB_EngStim$List <- ifelse(ListB_EngStim$word=="bed", "B", "B")
+
+# Combine all stimuli files
+stimuli1 <- rbind(ListA_SpanStim, ListA_EngStim, ListB_SpanStim, ListB_EngStim)
+
+write.csv(stimuli1, "./data/SuppData/StimRound1.csv")
+
+```
+
+```{r Combine Main Data and Stimuli Info and Save - Round 1}
+
+data_L1Span1_full <- left_join(assoc_L1Span1, stimuli1)
+#write.csv(data_L1Span1_full, "./data/associations_Round1_L1Span.csv")
+
+# DATA RE-SAVED AS EXCEL WORKBOOK, OBSERVATIONS CODED MANUALLY ON EXCEL AND RE-SAVED AS CSV
+
+```
+
+```{r Load Coded Data - Round 1}
+
+data_L1Span1 <- read.csv("./data/associations_Round1_L1Span.csv")
+
+```
+
+```{r Clean Data - Round 1}
+
+# N observations
+N <- nrow(data_L1Span1)
+N
+#[1] 15228
+
+# Filter out missing responses (NAs) and the Eng responses within the Span block
+data_L1Span1_clean <- data_L1Span1 %>%
+  filter (Comment != "Eng" | is.na(Comment)) %>%
+  filter (Response != "NA")
+
+# New N
+N_clean <- nrow(data_L1Span1_clean)
+N_clean
+#[1] 15105
+
+#% Data Lost in this step
+((N - N_clean)/N)*100
+#[1] 0.8077226
+# 0.81% of data lost on Round 1
+
+```
+
+```{r Create Network Matrix for Spanish block and Save - Round 1}
+
+# Change column names and filter per block
+data_L1Span1_Span <- data_L1Span1_clean %>%
+  rename(source=word_lemma,
+         target=Response_lemma,
+         block=Block) %>%
+  filter(block=="Span")
+
+# Create matrix with weights 
+links_L1Span1_Span <- ddply(data_L1Span1_Span, .(source, target), summarize, weight=length(source))
+View(links_L1Span1_Span)
+
+write.csv(links_L1Span1_Span, "./data/links_L1Span1_Span.csv")
+
+# Save individual node list for LMOSS (you must tell the model which words to look for in the corpus individually, before calculating co-occurrences):
+source_L1Span1_Span <- data.frame(node=unique(links_L1Span1_Span$source))
+target_L1Span1_Span <- data.frame(node=unique(links_L1Span1_Span$target))
+nodes_L1Span1_Span <- rbind(source_L1Span1, target_L1Span1)
+
+write.csv(nodes_L1Span1, "./data/nodes_L1Span1_Span.csv")
+
+```
+
+ROUND 2: 2 lists (A and B), with 50 participants on A, and 49 on B (50 were collected but one did not complete the survey).
+
+```{r Load Data - Round 2}
+
+# Main Data
+data2A <- read_csv("./data/Diss_Exp1_Round2_L1Span_ListA_raw.csv")
+data2B <- read_csv("./data/Diss_Exp1_Round2_L1Span_ListB_raw.csv")
+
+# Stimuli Info
+stimuli2 <- read_csv("./data/SuppData/StimRound2.csv")
+
+```
+
+```{r Data Wrangling - Round 2}
+
+# NOTE: List A has 50 participants and List B, 49 participants.
+
+# Exclude participants who reportedly were not born and raised speaking Spanish.
+data2A <- data2A %>%
+  filter(SpanL1 == "Yes") 
+data2B <- data2B %>%
+  filter(SpanL1 == "Yes") 
+
+# 1 participants excluded from list A bc answered "No" to the born and raised speaking Span question. No exclusions from list B.
+
+# Convert from wide format to long format.
+data2A <- data2A %>%
+  gather(Word, Associate, 5:97)%>%
+  mutate(Word = str_replace(Word, "X.Field.1..", ""))%>%
+  separate(Word, c("Word", "AssociateNumber"), "\\.")%>% #TO USE DOT AS SEPARATOR MUST INCLUDE "\\" FIRST
+  mutate(AssociateNumber = str_replace(AssociateNumber, "relatedword", ""))%>%
+  filter(Word != "Forthisquestiontypethewordbananainthethreeboxes") #Exclude catch trials.
+
+data2B <- data2B %>%
+  gather(Word, Associate, 5:94)%>%
+  mutate(Word = str_replace(Word, "X.Field.1..", ""))%>%
+  separate(Word, c("Word", "AssociateNumber"), "\\.")%>% #TO USE DOT AS SEPARATOR MUST INCLUDE "\\" FIRST
+  mutate(AssociateNumber = str_replace(AssociateNumber, "relatedword", ""))%>%
+  filter(Word != "Forthisquestiontypethewordbananainthethreeboxes") #Exclude catch trials.
+  
+# Add List column using dummy ifelse statement
+data2A$List <- ifelse(data2A$Gender == "Female", "A", "A")
+data2B$List <- ifelse(data2B$Gender == "Female", "B", "B")
+
+```
+
+```{r Combine Main Data and Stimuli Info and save - Round 2}
+
+# Add Stimuli Info to Main Data
+data2A_L1Span <- left_join(data2A, stimuli2)
+data2B_L1Span <- left_join(data2B, stimuli2)
+
+# Save both Lists
+#write.csv(dataASpan, "./data/associations_Span_Round2_ListA.csv")
+#write.csv(dataBSpan, "./data/associations_Span_Round2_ListB.csv")
+
+# Manual coding and re-saved
+
+```
+
+```{r Combine Both Lists and Save - Round 2}
+
+assocA <- read.csv("./data/associations_L1Span_Round2_ListA.csv") 
+assocB <- read.csv("./data/associations_L1Span_Round2_ListB.csv")
+
+assoc2_L1Span <- rbind (assocA, assocB)
+
+#write.csv(assoc2_L1Span, "./data/associations_Round2_L1Span.csv")
+
+```
+
+```{r Load Coded Data - Round 2}
+
+data_L1Span2 <- read_csv("./data/associations_Round2_L1Span.csv")
+
+```
+
+```{r Clean Data - Round 2}
+
+# N observations
+N <- nrow(data_L1Span2)
+N
+#[1] 8670
+
+# Filter out missing responses (NAs) and the Eng responses within the Span block, and Span responses within Eng block
+data_L1Span2_clean <- data_L1Span2 %>%
+  filter(Comments != "Eng" | is.na(Comments)) %>% #The second term keeps NAs
+  filter(Comments != "Eng, but could be typo" | is.na(Comments)) %>%
+  filter(Comments != "Span" | is.na(Comments)) %>%
+  filter(Response != "NA")
+
+N_clean <- nrow(data_L1Span2_clean)
+N_clean
+#[1] 8529
+
+#% Data Lost in this step
+((N-N_clean)/N)*100
+# [1] 1.626298 #1.63% of data lost in this step
+
+```
+
+```{r Create Network Matrix for Spanish block and Save - Round 2}
+
+# Rename columns and filter Spanish block. Eventually, we're creating separate matrices (bc cognates like alcohol or doctor will be counted as being the same word, regardless of language). This step wasn't necessary for Round 1, because I explicitly avoided cognates on the original stimuli set.
+data_L1Span2_Span <- data_L1Span2_clean %>%
+  rename(source=word_lemma,
+         target=Response_lemma,
+         block=Block) %>%
+  filter(block=="Span")
+
+# Create matrices with weights
+links_L1Span2_Span <- ddply(data_L1Span2_Span, .(source, target), summarize, weight=length(source))
+
+write.csv(links_L1Span2_Span,"./data/links_L1Span2_Span.csv")
+
+# Save individual nodes list for LMOSS (you must tell the model which words to look for in the corpus individually, before calculating co-occurrences):
+source_L1Span2_Span <- data.frame(node=unique(links_L1Span2_Span$source))
+target_L1Span2_Span <- data.frame(node=unique(links_L1Span2_Span$target))
+nodes_L1Span2_Span <- rbind(source_L1Span2_Span, target_L1Span2_Span)
+
+write.csv(nodes_L1Span2_Span, "./data/nodes_L1Span2_Span.csv")
+
+```
+
+ROUND 3: 1 list, with 50 participants. I collapsed all the stimuli into a single list because the list was much shorter, and there were no translation equivalents between English and Spanish, so no priming risk in this regard.
+
+```{r Load Data - Round 3}
+
+# Main Data
+data3 <- read.csv("./data/Diss_Exp1_Round3_L1Span_UniqueList_raw.csv")
+stimuli3 <- read.csv("./data/SuppData/StimRound3.csv")
+
+```
+
+```{r Data Wrangling and Save - Round 3}
+
+# Exclude participants who reportedly were not born and raised speaking Spanish.
+data3 <- data3 %>%
+  filter(SpanL1 == "Yes") 
+
+# 1 participants excluded bc answered "No" to the born and raised speaking Span question. 
+
+# Convert to long format.
+data3 <- data3 %>%
+  gather(Word, Associate, 5:94)%>%
+  mutate(Word = str_replace(Word, "X.Field.1..", ""))%>%
+  separate(Word, c("Word", "AssociateNumber"), "\\.")%>% #TO USE DOT AS SEPARATOR MUST INCLUDE "\\" FIRST
+  mutate(AssociateNumber = str_replace(AssociateNumber, "relatedword", ""))%>%
+  filter(Word != "Forthisquestiontypethewordbananainthethreeboxes") #Exclude catch trials.
+  
+# Add List column using dummy ifelse statement 
+data3$List <- ifelse(data3$Gender == "Female", "Unique", "Unique")
+
+```
+
+```{r Combine Main Data with Stimuli Info and Save - Round 3}
+
+# Combine responses w/stimuli info
+data3Span <- left_join(data3, stimuli3)
+
+#write.csv(data3Span, "./data/associations_Round3_L1Span.csv")
+
+# Observations manually coded and re-saved.
+
+```
+
+```{r Load Coded Data - Round 3}
+
+data_L1Span3 <- read_csv("./data/associations_Round3_L1Span.csv")
+
+```
+
+```{r Clean Data - Round 3}
+
+# N observations
+N <- nrow(data_L1Span3)
+N
+#[1] 4263
+
+# Filter out missing responses (NAs) and the Eng responses within the Span block, and Span responses within Eng block
+data_L1Span3_clean <- data_L1Span3 %>%
+  filter(Comments != "Eng" | is.na(Comments)) %>% #The second term keeps NAs
+  filter(Response != "NA")
+
+N_clean <- nrow(data_L1Span3_clean)
+N_clean
+#[1] 3934
+
+#% Data Lost in this step
+((N-N_clean)/N)*100
+# [1] 7.71757 #7.72% of data lost in this step
+
+```
+
+```{r Create Network Matrix for Spanish block and Save - Round 3}
+
+# Change column names and filter Span block
+data_L1Span3_Span <- data_L1Span3_clean %>%
+  rename(source=word_lemma,
+         target=Response_lemma,
+         block=Block) %>%
+  filter(block=="Span")
+
+# Create matrix with weights 
+links_L1Span3_Span <- ddply(data_L1Span3_Span, .(source, target), summarize, weight=length(source))
+View(links_L1Span3_Span)
+
+write.csv(links_L1Span3_Span, "./data/links_L1Span3_Span.csv")
+
+# Save individual nodes list for LMOSS (you must tell the model which words to look for in the corpus individually, before calculating co-occurrences):
+source_L1Span3_Span <- data.frame(node=unique(links_L1Span3_Span$source))
+target_L1Span3_Span <- data.frame(node=unique(links_L1Span3_Span$target))
+nodes_L1Span3_Span <- rbind(source_L1Span3_Span, target_L1Span3_Span)
+
+write.csv(nodes_L1Span3_Span, "./data/nodes_L1Span3_Span.csv")
+
+```
+
+---------------------L2 LEARNERS---------------------
+
+ROUND 1: 2 lists (A and B), partial data
+
+```{r Load Data - Round 1}
+
+data1A <- read_csv("./data/Diss_Exp1_Round1_L1Eng_ListA_raw.csv")
+data1B <- read_csv("./data/Diss_Exp1_Round1_L1Eng_ListB_raw.csv")
+
+stimuli1 <- read_csv("./data/SuppData/StimRound1.csv")
+
+```
+
+```{r Participants Exclusions - Round 1}
+
+# Exclude participants who reported not to be English native speakers, who had a Spanish-speaking caregiver or had Spanish spoken at home.
+data1A <- data1A %>%
+  filter(EngL1 == "Yes" | is.na(EngL1)) %>%
+  filter(Caregivers_speak_Span == "No" | is.na(Caregivers_speak_Span))
+data1B <- data1B %>%
+  filter(EngL1 == "Yes" | is.na(EngL1)) %>%
+  filter(Caregivers_speak_Span == "No" | is.na(Caregivers_speak_Span))
+# No exclusions due to participants not being native Eng speakers; 4 excluded because they reportedly had a Spanish-speaking caregiver from list A, and 2 from list B.
+
+# Exclude participants who spent 3+ months on a Spanish speaking country. I'm only including list B here, because one participant from list A did respond "Yes", but then clarified that the trip was 1-2 week long only.
+data1B <- data1B %>%
+  filter(Span_travel != "Yes" | is.na(Span_travel))
+# 1 participant excluded from List B for immersion.
+
+# Exclude participants who did not complete the survey or had too many NAs.
+data1A <- data1A %>%
+  filter(Participant != "EN71" & Participant !="EN77")
+data1B <- data1B %>%
+  filter(Participant != "EN80")
+# Excluded 2 participants from List A, and 1 from List B.
+
+# Final number of participants:
+nrow(data1A)
+#[1] 32
+
+nrow(data1B)
+#[1] 32
+
+```
+
+```{r Data Wrangling and Save - Round 1}
+
+# Convert to long format
+data1A <- data1A %>%
+  gather(word, Associate, 5:169)%>%
+  mutate(word = str_replace(word, "X.Field.2..", ""))%>%
+  separate(word, c("word_ID", "AssociateNumber"), "\\.")%>% #TO USE DOT AS SEPARATOR MUST INCLUDE "\\" FIRST
+  mutate(AssociateNumber = str_replace(AssociateNumber, "relatedword", ""))%>%
+  filter(word_ID != "Forthisquestiontypethewordbananainthethreeboxes")
+
+data1B <- data1B %>%
+  gather(word, Associate, 5:169)%>%
+  mutate(word = str_replace(word, "X.Field.2..", ""))%>%
+  separate(word, c("word_ID", "AssociateNumber"), "\\.")%>% #TO USE DOT AS SEPARATOR MUST INCLUDE "\\" FIRST
+  mutate(AssociateNumber = str_replace(AssociateNumber, "relatedword", ""))%>%
+  filter(word_ID != "Forthisquestiontypethewordbananainthethreeboxes")
+
+# Add List column with dummy ifelse statement
+data1A$List <- ifelse(data1A$Gender == "Female", "A", "A")
+data1B$List <- ifelse(data1B$Gender == "Female", "B", "B")
+
+# Add Stimuli Info
+data1A_full <- left_join(data1A, stimuli1)
+data1B_full <- left_join(data1B, stimuli1)
+
+```
+
+```{r Merge Datasets and Save}
+
+# Merge datasets
+assoc_L1Eng1 <- rbind(data1A_full, data1B_full)
+
+#write.csv(assoc_L1Eng1, "./data/associations_Round1_L1Eng.csv")
+
+# Observations coded manually and re-saved.
+
+```
+
+```{r Load Coded Data - Round 1}
+
+data_L1Eng1 <- read_csv("./data/associations_Round1_L1Eng.csv")
+
+```
+
+```{r Clean Data - Round 1}
+
+# N observations
+N <- nrow(data_L1Eng1)
+N
+#[1] 10368
+
+# Filter out missing responses (NAs) and the Eng responses within the Span block, and Span responses within Eng block
+data_L1Eng1_clean <- data_L1Eng1 %>%
+  filter(Comments != "Eng" | is.na(Comments)) %>% #The second term keeps NAs
+  filter(Orig_Response != "NA") # Using Orig_Response here insetad of the clean Response column, bc the English data hasn't been coded yet (i.e., they're all NAs)
+
+N_clean <- nrow(data_L1Eng1_clean)
+N_clean
+#[1] 10204
+
+#% Data Lost in this step
+((N-N_clean)/N)*100
+# [1] 1.58179 #1.58% of data lost in this step
+
+```
+
+```{r Create Network Matrix for Spanish block and Save - Round 1}
+
+# Change column names and filter Span block
+data_L1Eng1_Span <- data_L1Eng1_clean %>%
+  rename(source=word_lemma,
+         target=Response_lemma,
+         block=Block) %>%
+  filter(block=="Span")
+
+# Create matrix with weights 
+links_L1Eng1_Span <- ddply(data_L1Eng1_Span, .(source, target), summarize, weight=length(source))
+View(links_L1Eng1_Span)
+
+write.csv(links_L1Eng1_Span, "./data/links_L1Eng1_Span.csv")
+
+# Save individual nodes list for LMOSS (you must tell the model which words to look for in the corpus individually, before calculating co-occurrences):
+source_L1Eng1_Span <- data.frame(node=unique(links_L1Eng1_Span$source))
+target_L1Eng1_Span <- data.frame(node=unique(links_L1Eng1_Span$target))
+nodes_L1Eng1_Span <- rbind(source_L1Eng1_Span, target_L1Eng1_Span)
+
+write.csv(nodes_L1Eng1_Span, "./data/nodes_L1Eng1_Span.csv")
+
+```

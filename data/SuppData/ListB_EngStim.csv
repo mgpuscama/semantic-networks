@@ -1,0 +1,28 @@
+word_ID,Eng_word,Span_translation,scene,theme,count,log_count,frequency_per_million,log_frequency,log_frequency_per_N,zipf,word_class,num_letters,N_orthographic_neighbors,N_phonemes,N_syllables,N_phonological_neighbors,familiarity,imageability,concreteness
+1_1_1,bed,cama,moving_day,furniture_accessories,14008,4.146407,45.514131,1.667585,1.658177,4.658146,NOUN,4,30,4,2,53,6.515,7,6.116
+1_1_2,mirror,espejo,moving_day,furniture_accessories,8086,3.907787,26.272649,1.435727,1.419558,4.419504,NOUN,6,6,6,3,14,5.513,5.595,6.345
+1_1_4,vacuum cleaner,aspiradora,moving_day,furniture_accessories,79,1.90309,0.256683,0.099226,-0.58514,2.409397,NOUN,10,0,10,5,2,,,
+1_2_1,to clean,limpiar,moving_day,chores,2262,3.354685,7.349583,0.921665,0.866455,3.866263,VERB,7,3,7,2,8,6.52,5.093,4.681
+1_2_2,to cook,cocinar,moving_day,chores,1053,3.022841,3.421358,0.645556,0.534611,3.534199,VERB,7,4,7,3,7,,,
+1_2_3,to iron,planchar,moving_day,chores,124,2.09691,0.402895,0.147025,-0.39132,2.605192,VERB,8,2,7,2,8,4.906,,5.603
+1_3_1,store,tienda,moving_day,shopping,8073,3.907089,26.23041,1.435054,1.418859,4.418805,NOUN,6,5,6,2,7,6.609,6.409,4.807
+1_3_3,discount,rebaja,moving_day,shopping,2003,3.301898,6.508053,0.875527,0.813668,3.813451,NOUN,6,11,6,3,15,,,
+1_3_4,expensive,caro,moving_day,shopping,4797,3.68106,15.586185,1.219747,1.19283,4.19274,ADJECTIVE,4,33,4,2,81,,,
+2_1_1,soda,refresco,tailgate,food,677,2.83123,2.199676,0.505106,0.343,3.342359,NOUN,8,2,8,3,4,,,
+2_1_2,meat,carne,tailgate,food,24274,4.385159,78.869932,1.902383,1.896929,4.896911,NOUN,5,7,5,2,14,6.506,6.228,5.643
+2_1_3,salad,ensalada,tailgate,food,805,2.906335,2.615568,0.558177,0.418105,3.417566,NOUN,8,4,8,4,6,6.575,6.146,5.114
+2_2_2,game,partido,tailgate,sports,140725,5.148374,457.237013,2.66109,2.660144,5.660141,NOUN,7,1,7,3,7,6.043,5.626,3.586
+2_2_3,coach,entrenador,tailgate,sports,14078,4.148572,45.741572,1.669703,1.660342,4.660311,NOUN,10,2,10,4,4,,,
+2_2_6,referee,árbitro,tailgate,sports,4387,3.642267,14.254033,1.183385,1.154037,4.153938,NOUN,7,2,7,3,6,,,
+2_3_1,crutch,muleta,tailgate,health,1017,3.007748,3.304388,0.633911,0.519518,3.519091,NOUN,6,8,6,3,11,,,
+2_3_2,to get sick,enfermarse,tailgate,health,55,1.748188,0.178703,0.071405,-0.740042,2.252132,VERB,10,2,10,4,4,,,
+2_3_4,healthy,saludable,tailgate,health,2100,3.322426,6.823221,0.893386,0.834196,3.833989,ADJECTIVE,9,2,9,4,4,6.416,6.037,5.669
+3_1_1,shirt,camisa,spring_break,clothing,4224,3.625827,13.724421,1.168038,1.137597,4.137494,NOUN,6,6,6,3,9,6.7,6.281,6.293
+3_1_6,hat,sombrero,spring_break,clothing,6547,3.816109,21.272203,1.347763,1.327879,4.327812,NOUN,8,0,8,3,4,3.243,6.559,5.927
+3_1_3,skirt,falda,spring_break,clothing,2566,3.409426,8.337326,0.970223,0.921196,3.921027,NOUN,5,12,5,2,13,6.342,6.591,5.444
+3_2_5,airplane,avión,spring_break,traveling,14804,4.170408,48.100456,1.691086,1.682179,4.682149,NOUN,5,2,5,2,10,6.31,5.81,6.249
+3_2_2,beach,playa,spring_break,traveling,12029,4.080266,39.084058,1.602972,1.592036,4.592,NOUN,5,9,5,2,12,6.378,6.439,6.377
+3_2_3,to rent,alquilar,spring_break,traveling,667,2.824776,2.167185,0.500673,0.336547,3.335896,VERB,8,3,7,3,6,5.553,3.228,5.218
+3_3_1,rain,lluvia,spring_break,weather,12031,4.080338,39.090556,1.603042,1.592108,4.592072,NOUN,6,0,5,2,7,5.786,6.331,6.016
+3_3_2,sun,sol,spring_break,weather,45201,4.655158,146.864951,2.169865,2.166928,5.166918,NOUN,3,15,3,1,31,6.652,6.526,6.157
+3_3_4,cold,frío,spring_break,weather,14692,4.16711,47.736551,1.687855,1.678881,4.678851,NOUN,4,6,4,2,16,,,
