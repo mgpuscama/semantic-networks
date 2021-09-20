@@ -252,30 +252,77 @@ Mutual Information Scores - Round 1
 
 pmi_Span <- read_csv("./data/pmi_Round1_L1Span.csv")
 pmi_Eng <- read_csv("./data/pmi_Round1_L1Eng_prelim.csv")
+links_Span <- read_csv("./data/links_L1Span1_Span.csv")
+links_Eng <- read_csv("./data/links_L1Eng1_Span.csv")
 
 ```
 
-```{r Format and Merge Datasets - PMI}
+```{r Format Columns}
+
+pmi_Span <- pmi_Span %>%
+  separate(Pair, c("source", "target"), ",", remove=FALSE) %>%
+  filter(PMIClean != "NaN") %>%
+  mutate(PMIClean=as.numeric(PMIClean)) %>%
+  mutate(logSimpPMI = log(SimplifiedPMI), logPMI = log(PMIClean)) %>%
+  mutate(logSimpPMI=as.numeric(logSimpPMI), logPMI=as.numeric(logPMI)) %>% mutate(target = str_replace_all(target, " ", "")) %>%
+  mutate (target = str_replace_all(target, "_", " ")) %>%
+  select(Pair:logPMI)
+
+pmi_Eng <- pmi_Eng %>%
+  separate(Pair, c("source", "target"), ",", remove=FALSE) %>%
+  filter(PMIClean != "NaN") %>%
+  mutate(PMIClean=as.numeric(PMIClean)) %>%
+  mutate(logSimpPMI = log(SimplifiedPMI), logPMI = log(PMIClean)) %>%
+  mutate(logSimpPMI=as.numeric(logSimpPMI), logPMI=as.numeric(logPMI)) %>%
+  select(Pair:logPMI)
+
+links_Span <- links_Span %>%
+  select(source, target, weight)
+
+links_Eng <- links_Eng %>%
+  select(source, target, weight)
 
 # Add L1 column, using dummy ifelse statements
 pmi_Span$L1 <- ifelse(pmi_Span$PMI==0, "Span", "Span")
 pmi_Eng$L1 <- ifelse(pmi_Eng$PMI==0, "Eng", "Eng")
 
-# Merge datasets
-pmi_full <- rbind(pmi_Span, pmi_Eng)
+```
 
-# Add logPMI column (bc of Zipfian distribution)
-pmi_full$logPMI <- log(pmi_full$SimplifiedPMI)
+```{r Add links info, Save, and Re-Open - PMI}
+
+pmi_Span_complete <- left_join(pmi_Span, links_Span)
+pmi_Eng_complete <- merge(pmi_Eng, links_Eng)
+
+write.csv(pmi_Span_complete, "./data/pmi&links_Round1_L1Span_formatted.csv")
+write.csv(pmi_Eng_complete, "./data/pmi&links_Round1_L1Eng_formatted_prelim.csv")
+
+pmi_Span <- read_csv("./data/pmi&links_Round1_L1Span_formatted.csv")
+pmi_Eng <- read_csv("./data/pmi&links_Round1_L1Eng_formatted_prelim.csv")
 
 ```
 
-```{r Visualization - PMI}
+```{r Merge Datasets - PMI}
+
+# Merge datasets
+pmi_full <- rbind(pmi_Span, pmi_Eng)
+
+```
+
+```{r Visualizations - PMI}
 
 pmi_plot <- pmi_full %>%
-  ggplot(aes(x=logPMI, fill=L1)) + geom_density(alpha=0.2) + scale_fill_manual(values=c("#000000", "#0072B2"))
+  ggplot(aes(x=logSimpPMI, fill=L1)) + geom_density(alpha=0.2) + scale_fill_manual(values=c("#000000", "#0072B2"))
 pmi_plot
 
 ggsave("./figures/pmi_plot.png", plot = last_plot())
+
+pmi_plot2 <- pmi_full %>%
+  ggplot(aes(x=logPMI, fill=L1)) + geom_density(alpha=0.2) + scale_fill_manual(values=c("#000000", "#0072B2"))
+pmi_plot2
+
+pmi_plot3 <- pmi_full %>%
+  ggplot(aes(x=PMI, y=weight, fill=L1)) + geom_point() + scale_fill_manual(values=c("#000000", "#0072B2"))
+pmi_plot3
 
 ```
 
@@ -371,3 +418,76 @@ degrees_plot
 ggsave("./figures/degrees_plot.png", plot = last_plot())
 
 ```
+
+Mutual Information Scores - Round 2
+
+```{r Load Data - PMI Round 2}
+
+pmi_Span2 <- read_csv("./data/pmi_Round2_L1Span.csv")
+links_Span2 <- read_csv("./data/links_L1Span2_Span.csv")
+
+```
+
+```{r Format Columns Round 2}
+
+pmi_Span2 <- pmi_Span2 %>%
+  separate(Pair, c("source", "target"), ",", remove=FALSE) %>%
+  filter(PMIClean != "NaN") %>%
+  mutate(PMIClean=as.numeric(PMIClean)) %>%
+  mutate(logSimpPMI = log(SimplifiedPMI), logPMI = log(PMIClean)) %>%
+  mutate(logSimpPMI=as.numeric(logSimpPMI), logPMI=as.numeric(logPMI)) %>% mutate(target = str_replace_all(target, " ", "")) %>%
+  mutate (target = str_replace_all(target, "_", " ")) %>%
+  select(Pair:logPMI)
+
+links_Span2 <- links_Span2 %>%
+  select(source, target, weight)
+
+# Add L1 column, using dummy ifelse statements
+pmi_Span2$L1 <- ifelse(pmi_Span2$PMI==0, "Span", "Span")
+
+```
+
+```{r Add links info and Save - PMI Round 2}
+
+pmi_Span_complete2 <- left_join(pmi_Span2, links_Span2)
+
+write.csv(pmi_Span_complete2, "./data/pmi&links_Round2_L1Span_formatted.csv")
+
+```
+
+Mutual Information Scores - Round 3
+
+```{r Load Data - PMI Round 3}
+
+pmi_Span3 <- read_csv("./data/pmi_Round3_L1Span.csv")
+links_Span3 <- read_csv("./data/links_L1Span3_Span.csv")
+
+```
+
+```{r Format Columns Round 3}
+
+pmi_Span3 <- pmi_Span3 %>%
+  separate(Pair, c("source", "target"), ",", remove=FALSE) %>%
+  filter(PMIClean != "NaN") %>%
+  mutate(PMIClean=as.numeric(PMIClean)) %>%
+  mutate(logSimpPMI = log(SimplifiedPMI), logPMI = log(PMIClean)) %>%
+  mutate(logSimpPMI=as.numeric(logSimpPMI), logPMI=as.numeric(logPMI)) %>% mutate(target = str_replace_all(target, " ", "")) %>%
+  mutate (target = str_replace_all(target, "_", " ")) %>%
+  select(Pair:logPMI)
+
+links_Span3 <- links_Span3 %>%
+  select(source, target, weight)
+
+# Add L1 column, using dummy ifelse statements
+pmi_Span3$L1 <- ifelse(pmi_Span3$PMI==0, "Span", "Span")
+
+```
+
+```{r Add links info and Save - PMI Round 3}
+
+pmi_Span_complete3 <- left_join(pmi_Span3, links_Span3)
+
+write.csv(pmi_Span_complete3, "./data/pmi&links_Round3_L1Span_formatted.csv")
+
+```
+

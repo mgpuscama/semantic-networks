@@ -6,6 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(results = 'hide')
 knitr::opts_chunk$set(message = FALSE)
@@ -106,6 +107,10 @@ ListB_EngStim$List <- ifelse(ListB_EngStim$word=="bed", "B", "B")
 # Combine all stimuli files
 stimuli1 <- rbind(ListA_SpanStim, ListA_EngStim, ListB_SpanStim, ListB_EngStim)
 
+# Change column names
+stimuli1 <- stimuli1 %>%
+  setNames(c("Col1", "word_ID", "Word", "translation", "scene", "theme", "source_count", "source_log_count", "source_freq_per_mil", "source_log_freq", "source_log_freq_per_N", "source_zipf", "source_class", "source_N_letters", "source_N_orth_neighbors", "source_N_phon", "source_N_syll", "source_N_phon_neighbors", "source_familiarity", "source_imageability", "source_concreteness", "Block", "List"))
+
 write.csv(stimuli1, "./data/SuppData/StimRound1.csv")
 
 ```
@@ -121,7 +126,7 @@ data_L1Span1_full <- left_join(assoc_L1Span1, stimuli1)
 
 ```{r Load Coded Data - Round 1}
 
-data_L1Span1 <- read.csv("./data/associations_Round1_L1Span.csv")
+data_L1Span1 <- read_csv("./data/associations_Round1_L1Span.csv")
 
 ```
 
@@ -216,6 +221,14 @@ data2B <- data2B %>%
 # Add List column using dummy ifelse statement
 data2A$List <- ifelse(data2A$Gender == "Female", "A", "A")
 data2B$List <- ifelse(data2B$Gender == "Female", "B", "B")
+
+```
+
+```{r Stimuli Info Wrangling - Round 2}
+
+# Change column names
+stimuli2 <- stimuli2 %>%
+  setNames(c("word_ID", "Word", "translation", "List", "Block", "source_count", "source_log_count", "source_freq_per_mil", "source_log_freq", "source_log_freq_per_N", "source_zipf", "source_class", "source_N_letters", "source_N_orth_neighbors", "source_N_phon", "source_N_syll", "source_N_phon_neighbors", "source_familiarity", "source_imageability", "source_concreteness"))
 
 ```
 
@@ -325,6 +338,14 @@ data3 <- data3 %>%
   
 # Add List column using dummy ifelse statement 
 data3$List <- ifelse(data3$Gender == "Female", "Unique", "Unique")
+
+```
+
+```{r Stimuli Info Wrangling - Round 3}
+
+# Change column names
+stimuli3 <- stimuli3 %>%
+  setNames(c("word_ID", "Word", "translation", "Block", "source_count", "source_log_count", "source_freq_per_mil", "source_log_freq", "source_log_freq_per_N", "source_zipf", "source_class", "source_N_letters", "source_N_orth_neighbors", "source_N_phon", "source_N_syll", "source_N_phon_neighbors", "source_familiarity", "source_imageability", "source_concreteness"))
 
 ```
 

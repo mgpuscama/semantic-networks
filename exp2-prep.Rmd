@@ -1,0 +1,138 @@
+---
+title: "Experiment 2 Prep"
+author: "M. Gabriela Puscama"
+date: "9/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(fig.show='show')
+```
+
+```{r Load Packages}
+
+library(tidyverse) #To import, format and wrangle data, make plots (ggplot2), and edit strings (stringr)
+library(plyr) #To calculate links weights for network analysis. CAREFUL! Some functions like rename() and summarize() do not work properly on tidyverse when plyr is also loaded.
+
+```
+
+Preparation for Experiment 2 - Merging PMI and Links information witih stimuli and response information (frequencies, etc.), for native Span speakers.
+
+ROUND 1
+
+```{r Load Formatted PMI - Round 1}
+
+pmi_Span1 <- read_csv("./data/pmi&links_Round1_L1Span_formatted.csv")
+stimuli1 <- read_csv("./data/SuppData/StimRound1.csv")
+responses1 <- read_csv("./data/SuppData/ResponseInfo_Round1_L1Span.csv")
+
+```
+
+```{r Wrangle Stim and Response Info - Round 1}
+
+stimuli1 <- stimuli1 %>%
+  select(word_ID, word, translation, scene, theme, source_count, source_log_count, source_freq_per_mil, source_log_freq, source_freq_per_mil, source_log_freq, source_log_freq_per_N, source_zipf, source_class, source_N_letters, source_N_orth_neighbors, source_N_phon, source_N_syll, source_N_phon_neighbors, source_familiarity, source_imageability, source_concreteness, Block, List) %>%
+  rename(source = word)
+
+responses1 <- responses1 %>%
+  select(2:18) %>%
+  setNames(c("target", "word", "target_count", "target_log_count", "target_freq_per_mil", "target_log_freq", "target_log_freq_per_N", "target_zipf", "target_class", "target_N_letters", "target_N_orth_neighbors", "target_N_phon", "target_N_syll", "target_N_phon_neighbors", "target_familiarity", "target_imageability", "target_concreteness"))
+
+```
+
+```{r Merge PMI with Stim and Response Info and Save - Round 1}
+
+pmi_Span1b <- left_join(pmi_Span1, stimuli1, by="source")
+pmi_Span1_complete <- left_join(pmi_Span1b, responses1, by="target")
+
+write.csv(pmi_Span1_complete, "./data/pmi&links_Round1_L1Span_final.csv")
+
+```
+
+ROUND 2
+
+```{r Get Responses info - Round 2}
+
+# Get unique responses for EsPAL
+
+responses2 <- read_csv("./data/SuppData/ResponseInfo_Round2_L1Span.csv")
+unique_resp2 <- unique(responses2$response_lemma)
+unique_resp2 <- data.frame(unique_resp2)
+
+write.csv(unique_resp2, "./data/SuppData/ResponseInfo_Round2_L1Span.csv")
+
+```
+
+```{r Load Formatted PMI - Round 2}
+
+pmi_Span2 <- read_csv("./data/pmi&links_Round2_L1Span_formatted.csv")
+stimuli2 <- read_csv("./data/SuppData/StimRound2.csv")
+responses2 <- read_csv("./data/SuppData/ResponseInfo_Round2_L1Span.csv")
+
+```
+
+```{r Wrangle Stim and Response Info - Round 2}
+
+stimuli2 <- stimuli2 %>%
+  select(word_ID, Word, translation, count, log_count, frequency_per_million, log_frequency,  log_frequency_per_N, zipf, word_class, num_letters, N_orthographic_neighbors, N_phonemes, N_syllables, N_phonological_neighbors, familiarity, imageability, concreteness, Block, List) %>%
+  setNames(c("word_ID", "source", "translation", "source_count", "source_log_count", "source_freq_per_mil", "source_log_freq", "source_log_freq_per_N", "source_zipf", "source_class", "source_N_letters", "source_N_orth_neighbors", "source_N_phon", "source_N_syll", "source_N_phon_neighbors", "source_familiarity", "source_imageability", "source_concreteness", "Block", "List"))
+
+responses2 <- responses2 %>%
+  select(2:19) %>%
+  setNames(c("target", "word", "word_espal", "target_count", "target_log_count", "target_freq_per_mil", "target_log_freq", "target_log_freq_per_N", "target_zipf", "target_class", "target_N_letters", "target_N_orth_neighbors", "target_N_phon", "target_N_syll", "target_N_phon_neighbors", "target_familiarity", "target_imageability", "target_concreteness"))
+
+```
+
+```{r Merge PMI with Stim and Response Info and Save - Round 2}
+
+pmi_Span2b <- left_join(pmi_Span2, stimuli2, by="source")
+pmi_Span2_complete <- left_join(pmi_Span2b, responses2, by="target")
+
+write.csv(pmi_Span2_complete, "./data/pmi&links_Round2_L1Span_final.csv")
+
+```
+
+ROUND 3
+
+```{r Get Responses info - Round 3}
+
+# Get unique responses for EsPAL
+
+responses3 <- read_csv("./data/SuppData/ResponseInfo_Round3_L1Span.csv")
+unique_resp3 <- unique(responses3$response_lemma)
+unique_resp3 <- data.frame(unique_resp3)
+
+write.csv(unique_resp3, "./data/SuppData/ResponseInfo_Round3_L1Span.csv")
+
+```
+
+```{r Load Formatted PMI - Round 3}
+
+pmi_Span3 <- read_csv("./data/pmi&links_Round3_L1Span_formatted.csv")
+stimuli3 <- read_csv("./data/SuppData/StimRound3.csv")
+responses3 <- read_csv("./data/SuppData/ResponseInfo_Round3_L1Span.csv")
+
+```
+
+```{r Wrangle Stim and Response Info - Round 3}
+
+stimuli3 <- stimuli3 %>%
+  select(word_ID, Word, translation, count, log_count, frequency_per_million, log_frequency,  log_frequency_per_N, zipf, word_class, num_letters, N_orthographic_neighbors, N_phonemes, N_syllables, N_phonological_neighbors, familiarity, imageability, concreteness, Block) %>%
+  setNames(c("word_ID", "source", "translation", "source_count", "source_log_count", "source_freq_per_mil", "source_log_freq", "source_log_freq_per_N", "source_zipf", "source_class", "source_N_letters", "source_N_orth_neighbors", "source_N_phon", "source_N_syll", "source_N_phon_neighbors", "source_familiarity", "source_imageability", "source_concreteness", "Block"))
+
+responses3 <- responses3 %>%
+  select(2:19) %>%
+  setNames(c("target", "word", "word_espal", "target_count", "target_log_count", "target_freq_per_mil", "target_log_freq", "target_log_freq_per_N", "target_zipf", "target_class", "target_N_letters", "target_N_orth_neighbors", "target_N_phon", "target_N_syll", "target_N_phon_neighbors", "target_familiarity", "target_imageability", "target_concreteness"))
+
+```
+
+```{r Merge PMI with Stim and Response Info and Save - Round 3}
+
+pmi_Span3b <- left_join(pmi_Span3, stimuli3, by="source")
+pmi_Span3_complete <- left_join(pmi_Span3b, responses3, by="target")
+
+write.csv(pmi_Span3_complete, "./data/pmi&links_Round3_L1Span_final.csv")
+
+```
+
